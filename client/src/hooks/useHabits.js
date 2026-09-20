@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useCallback } from 'react';
+import api from '../api';
 
 export const useHabits = () => {
   const [habits, setHabits] = useState([]);
@@ -16,10 +16,8 @@ export const useHabits = () => {
 
   const fetchHabits = async () => {
     try {
-      const res = await axios.get('/api/habits', getHeaders());
-      if (res.data.success) {
-        setHabits(res.data.data);
-      }
+      const res = await api.get('/api/habits', getHeaders());
+      setHabits(res.data.data);
     } catch (error) {
       console.error('Error fetching habits', error);
     } finally {
@@ -33,11 +31,9 @@ export const useHabits = () => {
 
   const addHabit = async (habitData) => {
     try {
-      const res = await axios.post('/api/habits', habitData, getHeaders());
-      if (res.data.success) {
-        setHabits([res.data.data, ...habits]);
-        return true;
-      }
+      const res = await api.post('/api/habits', habitData, getHeaders());
+      setHabits([res.data.data, ...habits]);
+      return true;
     } catch (error) {
       console.error('Error adding habit', error);
       return false;
@@ -46,8 +42,8 @@ export const useHabits = () => {
 
   const deleteHabit = async (id) => {
     try {
-      await axios.delete(`/api/habits/${id}`, getHeaders());
-      setHabits(habits.filter(h => h._id !== id));
+      await api.delete(`/api/habits/${id}`, getHeaders());
+      setHabits(habits.filter(habit => habit._id !== id));
     } catch (error) {
       console.error('Error deleting habit', error);
     }
@@ -55,11 +51,9 @@ export const useHabits = () => {
 
   const completeHabit = async (id) => {
     try {
-      const res = await axios.post(`/api/habits/${id}/complete`, {}, getHeaders());
-      if (res.data.success) {
-        setHabits(habits.map(h => h._id === id ? res.data.data : h));
-        return true;
-      }
+      const res = await api.post(`/api/habits/${id}/complete`, {}, getHeaders());
+      setHabits(habits.map(habit => habit._id === id ? res.data.data : habit));
+      return true;
     } catch (error) {
       console.error('Error completing habit', error);
       return false;
