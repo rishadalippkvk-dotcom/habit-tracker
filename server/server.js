@@ -13,21 +13,25 @@ connectDB();
 const app = express();
 
 // Middleware
-const allowedOrigins = ['http://localhost:5173'];
-if (process.env.CLIENT_URL) {
-  allowedOrigins.push(process.env.CLIENT_URL);
-}
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(",").map(origin => origin.trim())
+  : [];
+allowedOrigins.push('http://localhost:5173');
 
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+  })
+);
 app.use(express.json());
 
 // Routes
